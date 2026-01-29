@@ -10,33 +10,12 @@ import (
 	"go-gin-testing-todos/internal/controller"
 	"go-gin-testing-todos/internal/model"
 	"go-gin-testing-todos/internal/service"
+	"go-gin-testing-todos/tests/integration/testhelper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-func setupTestContainer(ctx context.Context) (*mongodb.MongoDBContainer, *mongo.Database, error) {
-	mongodbContainer, err := mongodb.Run(ctx, "mongo:latest")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	endpoint, err := mongodbContainer.ConnectionString(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return mongodbContainer, client.Database("test_db"), nil
-}
 
 func TestDeleteTodoIntegration(t *testing.T) {
 	if testing.Short() {
@@ -44,7 +23,7 @@ func TestDeleteTodoIntegration(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	container, db, err := setupTestContainer(ctx)
+	container, db, err := testhelper.SetupTestContainer(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
