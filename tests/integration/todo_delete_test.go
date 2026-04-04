@@ -62,5 +62,5 @@ func TestDeleteTodoIntegration(t *testing.T) {
 	req2, _ := http.NewRequest("GET", "/todos/"+id.Hex(), nil)
 	router.ServeHTTP(w2, req2)
 
-	assert.Equal(t, http.StatusInternalServerError, w2.Code)
+	assert.Equal(t, http.StatusNotFound, w2.Code)
 }
