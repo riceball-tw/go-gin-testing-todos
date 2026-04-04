@@ -59,22 +59,22 @@ func TestEditTodoIntegration(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(updateData)
 	
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/todos/"+id.Hex(), bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(w, req)
+	updateRes := httptest.NewRecorder()
+	updateReq, _ := http.NewRequest("PUT", "/todos/"+id.Hex(), bytes.NewBuffer(jsonData))
+	updateReq.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(updateRes, updateReq)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, updateRes.Code)
 
 	// Verify: Check update via API
-	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("GET", "/todos/"+id.Hex(), nil)
-	router.ServeHTTP(w2, req2)
+	getRes := httptest.NewRecorder()
+	getReq, _ := http.NewRequest("GET", "/todos/"+id.Hex(), nil)
+	router.ServeHTTP(getRes, getReq)
 
-	assert.Equal(t, http.StatusOK, w2.Code)
+	assert.Equal(t, http.StatusOK, getRes.Code)
 	
 	var updatedTodo model.Todo
-	err = json.Unmarshal(w2.Body.Bytes(), &updatedTodo)
+	err = json.Unmarshal(getRes.Body.Bytes(), &updatedTodo)
 	assert.NoError(t, err)
 	assert.Equal(t, "Updated title", updatedTodo.Title)
 	assert.True(t, updatedTodo.Completed)

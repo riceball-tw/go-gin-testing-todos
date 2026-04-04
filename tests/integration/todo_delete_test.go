@@ -51,16 +51,16 @@ func TestDeleteTodoIntegration(t *testing.T) {
 	id := res.InsertedID.(primitive.ObjectID)
 
 	// Test: Delete via API
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/todos/"+id.Hex(), nil)
-	router.ServeHTTP(w, req)
+	deleteRes := httptest.NewRecorder()
+	deleteReq, _ := http.NewRequest("DELETE", "/todos/"+id.Hex(), nil)
+	router.ServeHTTP(deleteRes, deleteReq)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, deleteRes.Code)
 
 	// Verify: Check deletion via API
-	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("GET", "/todos/"+id.Hex(), nil)
-	router.ServeHTTP(w2, req2)
+	getRes := httptest.NewRecorder()
+	getReq, _ := http.NewRequest("GET", "/todos/"+id.Hex(), nil)
+	router.ServeHTTP(getRes, getReq)
 
-	assert.Equal(t, http.StatusNotFound, w2.Code)
+	assert.Equal(t, http.StatusNotFound, getRes.Code)
 }
