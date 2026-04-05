@@ -7,6 +7,7 @@ import (
 	"go-gin-testing-todos/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TodoController struct {
@@ -48,6 +49,10 @@ func (c *TodoController) GetByID(ctx *gin.Context) {
 	id := ctx.Param("id")
 	todo, err := c.service.GetByID(id)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

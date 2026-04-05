@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIDO2 Gin App</title>
+    <link rel="stylesheet" href="/public/style.css">
+    <!-- webauthn-json makes base64url handling easier for FIDO2 APIs -->
+    <script src="https://cdn.jsdelivr.net/npm/@github/webauthn-json/dist/browser-global/webauthn-json.browser-global.min.js"></script>
+</head>
+<body>
+    <div class="card">
+        <h1>🔐 Passkey Auth</h1>
+        
+        <div id="auth-section">
+            <p class="subtitle">Enter a username to register or login</p>
+            <input type="text" id="username" placeholder="Username" />
+            <div class="buttons">
+                <button id="btn-register" class="btn-primary">Register</button>
+                <button id="btn-login" class="btn-secondary">Login</button>
+            </div>
+            <p id="message"></p>
+        </div>
+
+        <div id="user-section" style="display:none;">
+            <p>Welcome back! You are authenticated.</p>
+            <p class="subtitle">User ID: <span id="logged-in-user"></span></p>
+            <button id="btn-logout" class="btn-danger">Logout</button>
+        </div>
+    </div>
+    <script src="/public/app.js"></script>
+</body>
+</html>
