@@ -18,6 +18,11 @@ func AddBusinessContext[T any](c *gin.Context, key string, value T) {
 	c.Set(businessContextKey, ctxMap)
 }
 
+func AddResourceAction(c *gin.Context, resource string, action string) {
+	AddBusinessContext(c, "resource", resource)
+	AddBusinessContext(c, "action", action)
+}
+
 // GetBusinessContext retrieves the accumulated business context from the request.
 // Returns nil if no context exists.
 func GetBusinessContext[T any](c *gin.Context) map[string]T {
