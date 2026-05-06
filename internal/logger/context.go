@@ -5,14 +5,13 @@ import "github.com/gin-gonic/gin"
 const businessContextKey = "logger_business_context"
 
 // AddBusinessContext adds a key-value pair to the request's business context.
-// This context will be logged as part of the wide event at the end of the request.
-func AddBusinessContext(c *gin.Context, key string, value any) {
-	var ctxMap map[string]any
+// User provides a custom context type T to enforce compile-time type safety.
+// Example: type MyContext map[string]string
+func AddBusinessContext[T any](c *gin.Context, key string, value T) {
+	ctxMap := make(map[string]interface{})
 
 	if existing, exists := c.Get(businessContextKey); exists {
-		ctxMap = existing.(map[string]any)
-	} else {
-		ctxMap = make(map[string]any)
+		ctxMap = existing.(map[string]interface{})
 	}
 
 	ctxMap[key] = value
@@ -20,9 +19,15 @@ func AddBusinessContext(c *gin.Context, key string, value any) {
 }
 
 // GetBusinessContext retrieves the accumulated business context from the request.
-func GetBusinessContext(c *gin.Context) map[string]any {
+// Returns nil if no context exists.
+func GetBusinessContext[T any](c *gin.Context) map[string]T {
 	if existing, exists := c.Get(businessContextKey); exists {
-		return existing.(map[string]any)
+		rawMap := existing.(map[string]interface{})
+		result := make(map[string]T)
+		for k, v := range rawMap {
+			result[k] = v.(T)
+		}
+		return result
 	}
 	return nil
 }

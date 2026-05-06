@@ -31,7 +31,7 @@ func WideEventMiddleware() gin.HandlerFunc {
 
 		// Gather business context and determine log message
 		var msg string = "http_completed"
-		if bizCtx := GetBusinessContext(c); bizCtx != nil {
+		if bizCtx := GetBusinessContext[any](c); bizCtx != nil {
 			for k, v := range bizCtx {
 				fields = append(fields, slog.Any(k, v))
 			}
