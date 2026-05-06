@@ -3,8 +3,10 @@ package logger
 import (
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lmittmann/tint"
 	"github.com/natefinch/lumberjack"
 )
 
@@ -14,8 +16,9 @@ func InitLogger() {
 	var handler slog.Handler
 
 	if gin.Mode() == gin.DebugMode {
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug,
+		handler = tint.NewHandler(os.Stdout, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: time.Kitchen,
 		})
 	} else {
 		handler = slog.NewJSONHandler(&lumberjack.Logger{
