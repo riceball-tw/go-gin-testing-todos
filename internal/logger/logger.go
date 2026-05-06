@@ -13,8 +13,10 @@ func InitLogger() {
 		Level: slog.LevelInfo,
 	})
 
-	slog.SetDefault(slog.New(handler.WithAttrs([]slog.Attr{
+	Log = slog.New(handler.WithAttrs([]slog.Attr{
 		// Add global characteristics to all logs from this logger
 		slog.String("service", "go-gin-testing-todos"),
-	})))
+	}))
+
+	slog.SetDefault(Log)
 }
