@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
+	"go-gin-testing-todos/internal/logger"
 	"go-gin-testing-todos/internal/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,6 +33,9 @@ func NewTodoService(db *mongo.Database) TodoService {
 
 func (s *todoService) Create(todo *model.Todo) error {
 	todo.CreatedAt = time.Now()
+
+	logger.Log.Debug("Creating todo", slog.String("collection", "todos"), slog.String("operation", "InsertOne"), slog.Any("document", todo))
+
 	res, err := s.collection.InsertOne(context.Background(), todo)
 	if err != nil {
 		return err
@@ -40,6 +45,8 @@ func (s *todoService) Create(todo *model.Todo) error {
 }
 
 func (s *todoService) GetAll() ([]model.Todo, error) {
+	logger.Log.Debug("Get All Todos", slog.String("collection", "todos"), slog.String("operation", "Find"), slog.Any("filter", bson.M{}))
+
 	cursor, err := s.collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, err
@@ -58,6 +65,9 @@ func (s *todoService) GetByID(id string) (*model.Todo, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debug("executing database query", slog.String("collection", "todos"), slog.String("operation", "FindOne"), slog.Any("filter", bson.M{"_id": oid}))
+
 	var todo model.Todo
 	err = s.collection.FindOne(context.Background(), bson.M{"_id": oid}).Decode(&todo)
 	if err != nil {
@@ -77,6 +87,9 @@ func (s *todoService) Update(id string, todo *model.Todo) error {
 			"completed": todo.Completed,
 		},
 	}
+
+	logger.Log.Debug("Updating Todo", slog.String("collection", "todos"), slog.String("operation", "UpdateOne"), slog.Any("filter", bson.M{"_id": oid}), slog.Any("update", update))
+
 	_, err = s.collection.UpdateOne(context.Background(), bson.M{"_id": oid}, update)
 	return err
 }
@@ -86,6 +99,9 @@ func (s *todoService) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+
+	logger.Log.Debug("Deleting Todo", slog.String("collection", "todos"), slog.String("operation", "DeleteOne"), slog.Any("filter", bson.M{"_id": oid}))
+
 	_, err = s.collection.DeleteOne(context.Background(), bson.M{"_id": oid})
 	return err
 }

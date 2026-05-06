@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"go-gin-testing-todos/internal/logger"
 	"go-gin-testing-todos/internal/model"
 	"go-gin-testing-todos/internal/service"
 
@@ -18,36 +19,53 @@ func NewTodoController(s service.TodoService) *TodoController {
 }
 
 func (c *TodoController) Create(ctx *gin.Context) {
+	logger.AddResourceAction(ctx, "todo", "create")
+
 	var todo model.Todo
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	logger.AddBusinessContext(ctx, "todo_title", todo.Title)
+
 	if err := c.service.Create(&todo); err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	logger.AddBusinessContext(ctx, "todo_id", todo.ID)
 	ctx.JSON(http.StatusCreated, todo)
 }
 
 func (c *TodoController) GetAll(ctx *gin.Context) {
+	logger.AddResourceAction(ctx, "todo", "read")
+
 	todos, err := c.service.GetAll()
 	if err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	if todos == nil {
 		todos = []model.Todo{}
 	}
+	
+	logger.AddBusinessContext(ctx, "todos_count", len(todos))
 	ctx.JSON(http.StatusOK, todos)
 }
 
 func (c *TodoController) GetByID(ctx *gin.Context) {
+	logger.AddResourceAction(ctx, "todo", "read")
+
 	id := ctx.Param("id")
+	logger.AddBusinessContext(ctx, "todo_id", id)
+
 	todo, err := c.service.GetByID(id)
 	if err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -55,14 +73,20 @@ func (c *TodoController) GetByID(ctx *gin.Context) {
 }
 
 func (c *TodoController) Update(ctx *gin.Context) {
+	logger.AddResourceAction(ctx, "todo", "update")
+
 	id := ctx.Param("id")
+	logger.AddBusinessContext(ctx, "todo_id", id)
+
 	var todo model.Todo
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := c.service.Update(id, &todo); err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -71,8 +95,13 @@ func (c *TodoController) Update(ctx *gin.Context) {
 }
 
 func (c *TodoController) Delete(ctx *gin.Context) {
+	logger.AddResourceAction(ctx, "todo", "delete")
+
 	id := ctx.Param("id")
+	logger.AddBusinessContext(ctx, "todo_id", id)
+
 	if err := c.service.Delete(id); err != nil {
+		ctx.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
