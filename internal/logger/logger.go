@@ -15,10 +15,18 @@ var Log *slog.Logger
 func InitLogger() {
 	var handler slog.Handler
 
+	const pinkColor uint8 = 5
+
 	if gin.Mode() == gin.DebugMode {
 		handler = tint.NewHandler(os.Stdout, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.Kitchen,
+			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+				if a.Key == "error_message" && len(groups) == 0 {
+					return tint.Attr(pinkColor, a)
+				}
+				return a
+			},
 		})
 	} else {
 		handler = slog.NewJSONHandler(&lumberjack.Logger{
