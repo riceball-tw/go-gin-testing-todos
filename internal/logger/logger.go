@@ -2,14 +2,20 @@ package logger
 
 import (
 	"log/slog"
-	"os"
+
+	"github.com/natefinch/lumberjack"
 )
 
 var Log *slog.Logger
 
-// InitLogger initializes a global structured JSON logger.
 func InitLogger() {
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	handler := slog.NewJSONHandler(&lumberjack.Logger{
+		Filename:   "logs/app.log",
+		MaxSize:    10,
+		MaxBackups: 5,
+		MaxAge:     30,
+		Compress:   true,
+	}, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	})
 
