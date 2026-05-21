@@ -14,12 +14,12 @@ func WideEventMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		
+
 		statusCode := c.Writer.Status()
 		requestID, _ := c.Get("requestId")
 		requestIDStr, _ := requestID.(string)
 
-		fields := []any{
+		fields := []slog.Attr{
 			slog.String("method", c.Request.Method),
 			slog.Int("status_code", statusCode),
 			slog.String("path", c.Request.URL.Path),
@@ -31,14 +31,14 @@ func WideEventMiddleware() gin.HandlerFunc {
 
 		// Gather business context and determine log message
 		var msg string = "http_completed"
-		if bizCtx := GetBusinessContext[any](c); bizCtx != nil {
-			for k, v := range bizCtx {
-				fields = append(fields, slog.Any(k, v))
+		if bizCtx := GetBusinessContext(c); bizCtx != nil {
+			for _, attr := range bizCtx {
+				fields = append(fields, attr)
 			}
 
 			// Build message from resource + action if both present
-			if resource, ok := bizCtx["resource"].(string); ok {
-				if action, ok := bizCtx["action"].(string); ok {
+			if resource, ok := businessContextString(bizCtx, "resource"); ok {
+				if action, ok := businessContextString(bizCtx, "action"); ok {
 					msg = resource + "_" + action
 				}
 			}
@@ -46,16 +46,24 @@ func WideEventMiddleware() gin.HandlerFunc {
 
 		// Add Error to log
 		if len(c.Errors) > 0 {
-				fields = append(fields, slog.String("error_message", c.Errors.Last().Error()))
+			fields = append(fields, slog.String("error_message", c.Errors.Last().Error()))
 		}
 
 		switch {
 		case statusCode >= 500:
-				Log.Error(msg, fields...)
+			Log.LogAttrs(c.Request.Context(), slog.LevelError, msg, fields...)
 		case statusCode >= 400:
-				Log.Warn(msg, fields...)
+			Log.LogAttrs(c.Request.Context(), slog.LevelWarn, msg, fields...)
 		default:
-				Log.Info(msg, fields...)
+			Log.LogAttrs(c.Request.Context(), slog.LevelInfo, msg, fields...)
 		}
 	}
+}
+
+func businessContextString(bizCtx map[string]slog.Attr, key string) (string, bool) {
+	attr, ok := bizCtx[key]
+	if !ok || attr.Value.Kind() != slog.KindString {
+		return "", false
+	}
+	return attr.Value.String(), true
 }
