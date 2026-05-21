@@ -31,10 +31,8 @@ func WideEventMiddleware() gin.HandlerFunc {
 
 		// Gather business context and determine log message
 		var msg string = "http_completed"
-		if bizCtx := GetBusinessContext(c); bizCtx != nil {
-			for _, attr := range bizCtx {
-				fields = append(fields, attr)
-			}
+		if bizCtx := GetBusinessContext(c); len(bizCtx) > 0 {
+			fields = append(fields, bizCtx...)
 
 			// Build message from resource + action if both present
 			if resource, ok := businessContextString(bizCtx, "resource"); ok {
@@ -60,10 +58,12 @@ func WideEventMiddleware() gin.HandlerFunc {
 	}
 }
 
-func businessContextString(bizCtx map[string]slog.Attr, key string) (string, bool) {
-	attr, ok := bizCtx[key]
-	if !ok || attr.Value.Kind() != slog.KindString {
-		return "", false
+func businessContextString(bizCtx []slog.Attr, key string) (string, bool) {
+	for i := len(bizCtx) - 1; i >= 0; i-- {
+		attr := bizCtx[i]
+		if attr.Key == key && attr.Value.Kind() == slog.KindString {
+			return attr.Value.String(), true
+		}
 	}
-	return attr.Value.String(), true
+	return "", false
 }
