@@ -29,24 +29,12 @@ func WideEventMiddleware() gin.HandlerFunc {
 			slog.String("requestId", requestIDStr),
 		}
 
-		// Gather business context and determine log message
-		var msg string = "http_completed"
-		if bizCtx := GetBusinessContext(c); len(bizCtx) > 0 {
-			fields = append(fields, bizCtx...)
-
-			// Build message from resource + action if both present
-			if resource, ok := businessContextString(bizCtx, "resource"); ok {
-				if action, ok := businessContextString(bizCtx, "action"); ok {
-					msg = resource + "_" + action
-				}
-			}
-		}
-
 		// Add Error to log
 		if len(c.Errors) > 0 {
 			fields = append(fields, slog.String("error_message", c.Errors.Last().Error()))
 		}
 
+		msg := "request_completed"
 		switch {
 		case statusCode >= 500:
 			Log.LogAttrs(c.Request.Context(), slog.LevelError, msg, fields...)
@@ -56,14 +44,4 @@ func WideEventMiddleware() gin.HandlerFunc {
 			Log.LogAttrs(c.Request.Context(), slog.LevelInfo, msg, fields...)
 		}
 	}
-}
-
-func businessContextString(bizCtx []slog.Attr, key string) (string, bool) {
-	for i := len(bizCtx) - 1; i >= 0; i-- {
-		attr := bizCtx[i]
-		if attr.Key == key && attr.Value.Kind() == slog.KindString {
-			return attr.Value.String(), true
-		}
-	}
-	return "", false
 }

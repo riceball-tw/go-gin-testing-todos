@@ -25,14 +25,6 @@ func AddBusinessContext(c *gin.Context, attrs ...slog.Attr) {
 	c.Set(businessContextKey, ctxAttrs)
 }
 
-func AddResourceAction(c *gin.Context, resource string, action string) {
-	AddBusinessContext(
-		c,
-		slog.String("resource", resource),
-		slog.String("action", action),
-	)
-}
-
 // GetBusinessContext retrieves the accumulated business context from the request.
 // Returns a copy so callers cannot mutate the context state.
 func GetBusinessContext(c *gin.Context) []slog.Attr {

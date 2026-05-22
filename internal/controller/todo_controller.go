@@ -20,8 +20,6 @@ func NewTodoController(s service.TodoService) *TodoController {
 }
 
 func (c *TodoController) Create(ctx *gin.Context) {
-	logger.AddResourceAction(ctx, "todo", "create")
-
 	var todo model.Todo
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
 		ctx.Error(err)
@@ -42,8 +40,6 @@ func (c *TodoController) Create(ctx *gin.Context) {
 }
 
 func (c *TodoController) GetAll(ctx *gin.Context) {
-	logger.AddResourceAction(ctx, "todo", "read")
-
 	todos, err := c.service.GetAll()
 	if err != nil {
 		ctx.Error(err)
@@ -59,8 +55,6 @@ func (c *TodoController) GetAll(ctx *gin.Context) {
 }
 
 func (c *TodoController) GetByID(ctx *gin.Context) {
-	logger.AddResourceAction(ctx, "todo", "read")
-
 	id := ctx.Param("id")
 	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
 
@@ -74,8 +68,6 @@ func (c *TodoController) GetByID(ctx *gin.Context) {
 }
 
 func (c *TodoController) Update(ctx *gin.Context) {
-	logger.AddResourceAction(ctx, "todo", "update")
-
 	id := ctx.Param("id")
 	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
 
@@ -96,8 +88,6 @@ func (c *TodoController) Update(ctx *gin.Context) {
 }
 
 func (c *TodoController) Delete(ctx *gin.Context) {
-	logger.AddResourceAction(ctx, "todo", "delete")
-
 	id := ctx.Param("id")
 	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
 
