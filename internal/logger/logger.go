@@ -2,12 +2,15 @@ package logger
 
 import (
 	"log/slog"
+	"net"
+	"net/url"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lmittmann/tint"
 	"github.com/natefinch/lumberjack"
+	slogsyslog "github.com/samber/slog-syslog/v2"
 )
 
 var Log *slog.Logger
@@ -29,7 +32,7 @@ func InitLogger() {
 			},
 		})
 	} else {
-		handler = slog.NewJSONHandler(&lumberjack.Logger{
+		fileHandler := slog.NewJSONHandler(&lumberjack.Logger{
 			Filename:   "logs/app.log",
 			MaxSize:    10,
 			MaxBackups: 5,
@@ -38,6 +41,18 @@ func InitLogger() {
 		}, &slog.HandlerOptions{
 			Level: slog.LevelInfo,
 		})
+
+		handler = fileHandler
+		if syslogURL := os.Getenv("SYSLOG_URL"); syslogURL != "" {
+			if u, err := url.Parse(syslogURL); err == nil {
+				if syslogWriter, err := net.Dial(u.Scheme, u.Host); err == nil {
+					handler = slogsyslog.Option{
+						Level:  slog.LevelInfo,
+						Writer: syslogWriter,
+					}.NewSyslogHandler()
+				}
+			}
+		}
 	}
 
 	Log = slog.New(handler.WithAttrs([]slog.Attr{
