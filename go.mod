@@ -7,6 +7,8 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/lmittmann/tint v1.1.3
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/samber/slog-channel v1.4.4
+	github.com/samber/slog-multi v1.8.0
 	github.com/samber/slog-syslog/v2 v2.5.4
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.40.0
