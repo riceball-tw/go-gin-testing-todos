@@ -27,7 +27,7 @@ func (c *TodoController) Create(ctx *gin.Context) {
 		return
 	}
 
-	logger.AddBusinessContext(ctx, slog.String("todo_title", todo.Title))
+	logger.AddContext(ctx, slog.String("todo_title", todo.Title))
 
 	if err := c.service.Create(&todo); err != nil {
 		ctx.Error(err)
@@ -35,7 +35,7 @@ func (c *TodoController) Create(ctx *gin.Context) {
 		return
 	}
 
-	logger.AddBusinessContext(ctx, slog.String("todo_id", todo.ID.Hex()))
+	logger.AddContext(ctx, slog.String("todo_id", todo.ID.Hex()))
 	ctx.JSON(http.StatusCreated, todo)
 }
 
@@ -50,13 +50,13 @@ func (c *TodoController) GetAll(ctx *gin.Context) {
 		todos = []model.Todo{}
 	}
 
-	logger.AddBusinessContext(ctx, slog.Int("todos_count", len(todos)))
+	logger.AddContext(ctx, slog.Int("todos_count", len(todos)))
 	ctx.JSON(http.StatusOK, todos)
 }
 
 func (c *TodoController) GetByID(ctx *gin.Context) {
 	id := ctx.Param("id")
-	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
+	logger.AddContext(ctx, slog.String("todo_id", id))
 
 	todo, err := c.service.GetByID(id)
 	if err != nil {
@@ -69,7 +69,7 @@ func (c *TodoController) GetByID(ctx *gin.Context) {
 
 func (c *TodoController) Update(ctx *gin.Context) {
 	id := ctx.Param("id")
-	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
+	logger.AddContext(ctx, slog.String("todo_id", id))
 
 	var todo model.Todo
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
@@ -89,7 +89,7 @@ func (c *TodoController) Update(ctx *gin.Context) {
 
 func (c *TodoController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
-	logger.AddBusinessContext(ctx, slog.String("todo_id", id))
+	logger.AddContext(ctx, slog.String("todo_id", id))
 
 	if err := c.service.Delete(id); err != nil {
 		ctx.Error(err)

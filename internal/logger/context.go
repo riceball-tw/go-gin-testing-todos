@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const businessContextKey = "logger_business_context"
+const businessContextKey = "logger_context"
 
-// AddBusinessContext appends typed slog attributes to the request's business context.
-func AddBusinessContext(c *gin.Context, attrs ...slog.Attr) {
+// AddContext appends typed slog attributes to the request's business context.
+func AddContext(c *gin.Context, attrs ...slog.Attr) {
 	if len(attrs) == 0 {
 		return
 	}
@@ -25,9 +25,9 @@ func AddBusinessContext(c *gin.Context, attrs ...slog.Attr) {
 	c.Set(businessContextKey, ctxAttrs)
 }
 
-// GetBusinessContext retrieves the accumulated business context from the request.
+// GetContext retrieves the accumulated business context from the request.
 // Returns a copy so callers cannot mutate the context state.
-func GetBusinessContext(c *gin.Context) []slog.Attr {
+func GetContext(c *gin.Context) []slog.Attr {
 	if existing, exists := c.Get(businessContextKey); exists {
 		if attrs, ok := existing.([]slog.Attr); ok {
 			return append([]slog.Attr(nil), attrs...)
