@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go-gin-testing-todos/internal/controller"
+	"go-gin-testing-todos/internal/logger"
 	"go-gin-testing-todos/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,9 @@ import (
 )
 
 func main() {
+	// Initialize logger
+	logger.InitLogger()
+
 	// MongoDB Connection
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -35,7 +39,10 @@ func main() {
 	todoController := controller.NewTodoController(todoService)
 
 	// Router
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logger.RequestIDMiddleware())
+	r.Use(logger.WideEventMiddleware())
 	
 	// Create a new router group for /todos
     // this wraps the handlers to make them compatible with gin.HandlerFunc
